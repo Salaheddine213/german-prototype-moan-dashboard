@@ -1,0 +1,112 @@
+site_name: German Electricity Market Analytics
+site_description: Interactive dashboard for German electricity market data, forecasts and model diagnostics.
+site_url: https://<you>.github.io/birdcurve-germany/
+repo_url: https://github.com/<you>/birdcurve-germany
+repo_name: <you>/birdcurve-germany
+# edit_uri intentionally unset: mkdocs-gen-files virtual pages have no real
+# file to edit, so `content.action.edit` would 404 on the reference section.
+# Source for generated pages is reachable via mkdocstrings' show_source.
+
+docs_dir: docs
+site_dir: site
+
+# Files under docs/ that should not ship in the rendered site.
+exclude_docs: |
+  build-decisions-and-modernization-history.md
+  build-plan-extraction-and-modernization.md
+  gen_ref_pages.py
+  requirements.txt
+
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.indexes
+    - navigation.top
+    - navigation.instant
+    - navigation.tracking
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [dashboard/backend]
+          options:
+            docstring_style: google
+            members_order: source
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            separate_signature: true
+            merge_init_into_class: true
+            filters: ["!^_"]
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - Overview: overview.md
+  - Architecture: architecture.md
+  - Deployment: deployment.md
+  - API reference: reference/

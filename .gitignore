@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+.venv/
+venv/
+.pixi/
+# Node / Vite
+node_modules/
+dist/
+.vite/
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+.playwright-mcp/
+# Local data (NEVER commit)
+data/
+*.duckdb
+*.db
+*.sqlite
+*.feather
+*.parquet
+model_results/
+# Demo artifacts are generated at startup and must never be committed.
+demo_artifacts/
+.env
+.env.local
+# MkDocs
+site/

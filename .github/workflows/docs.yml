@@ -1,0 +1,80 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "mkdocs.yml"
+      - "docs/**"
+      - "dashboard/backend/app/**"
+      - ".github/workflows/docs.yml"
+      - "README.md"
+  pull_request:
+    paths:
+      - "mkdocs.yml"
+      - "docs/**"
+      - "dashboard/backend/app/**"
+      - ".github/workflows/docs.yml"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        # No fetch-depth: 0 — neither mkdocstrings nor any plugin we ship
+        # reads git history. Add it back only when wiring a git-revision plugin.
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: docs/requirements.txt
+
+      - name: Install MkDocs + plugins
+        run: pip install -r docs/requirements.txt
+
+      - name: Build site
+        env:
+          # Silences promotional warning from properdocs (transitive dep of
+          # mkdocs-gen-files / mkdocs-literate-nav).
+          DISABLE_MKDOCS_2_WARNING: "true"
+        run: mkdocs build --strict --site-dir site
+
+      - name: Add .nojekyll
+        run: touch site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'pull_request'
+        with:
+          name: docs-html
+          path: site
+          retention-days: 7
+
+  deploy:
+    needs: build
+    # Deploy on push-to-main and on manual workflow_dispatch from main.
+    # PRs only upload an artifact and skip deploy.
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
