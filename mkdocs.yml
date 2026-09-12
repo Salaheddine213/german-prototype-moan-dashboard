@@ -1,8 +1,8 @@
 site_name: German Electricity Market Analytics
 site_description: Interactive dashboard for German electricity market data, forecasts and model diagnostics.
-site_url: https://<you>.github.io/birdcurve-germany/
-repo_url: https://github.com/<you>/birdcurve-germany
-repo_name: <you>/birdcurve-germany
+site_url: https://salaheddine213.github.io/german-prototype-moan-dashboard/
+repo_url: https://github.com/Salaheddine213/german-prototype-moan-dashboard
+repo_name: Salaheddine213/german-prototype-moan-dashboard
 # edit_uri intentionally unset: mkdocs-gen-files virtual pages have no real
 # file to edit, so `content.action.edit` would 404 on the reference section.
 # Source for generated pages is reachable via mkdocstrings' show_source.
