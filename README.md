@@ -1,10 +1,26 @@
-# German Electricity Market Analytics (birdcurve-germany)
+# German Electricity Market Analytics
 
 Interactive dashboard for the **German electricity market**: day-ahead prices, load/demand, renewable generation (PV, wind on/offshore), cross-border flows, commodity fuel & carbon costs, ancillary services (aFRR / FCR), price forecasts out to 2050, ML model diagnostics, and scenario assumptions.
 
 Built as a portfolio project and Python/DevOps engineering showcase: **FastAPI + DuckDB** backend, **React 19 + TypeScript + Vite** frontend, automated tests, and GitHub Actions CI/CD.
 
+- **Repository:** https://github.com/Salaheddine213/german-prototype-moan-dashboard
+- **Documentation (MkDocs):** https://salaheddine213.github.io/german-prototype-moan-dashboard/
+- **CI status:** backend pytest (32) + frontend build run on every push (`Actions` tab)
+
 > **No proprietary data or model artifacts are required.** The app runs out-of-the-box in **demo mode** with clearly-labelled synthetic German market data (`source = DEMO_SYNTHETIC` everywhere). A bring-your-own-data **live mode** plugs your own DuckDB + model-artifact files in behind the same API contract.
+
+## Try it (2 commands)
+
+```bash
+git clone https://github.com/Salaheddine213/german-prototype-moan-dashboard.git
+cd german-prototype-moan-dashboard/dashboard
+make install   # creates backend/.venv + installs Python deps + npm install
+make dev       # backend on :8000, frontend on :5173
+# open http://localhost:5173
+```
+
+Requires **Python 3.11+** and **Node.js 20+**. First start generates the synthetic dataset (~5–10 s, cached under `backend/demo_artifacts/`, git-ignored). Windows users: `make install-backend` now detects the `.venv\Scripts` layout automatically.
 
 ## Highlights
 
@@ -14,6 +30,18 @@ Built as a portfolio project and Python/DevOps engineering showcase: **FastAPI +
 - **Server-side LTTB downsampling** caps every chart payload to a few thousand points without losing extremes.
 - **React 19 + TanStack Query + Vite** frontend; ECharts for analytics, TradingView lightweight-charts for time series (the on-canvas attribution logo is disabled, so this notice serves as attribution: charting powered by [TradingView Lightweight Charts](https://www.tradingview.com/lightweight-charts/)).
 - **Automated tests + CI** — backend `pytest` suite that runs fully against the synthetic demo data, frontend `tsc`/`vite build` as the API-contract check, both wired into GitHub Actions.
+
+## Screenshots (real captures from the running app)
+
+| Commodities | Electricity | Forecast |
+| --- | --- | --- |
+| ![Commodities](docs/screenshots/page-commodities.png) | ![Electricity](docs/screenshots/page-electricity.png) | ![Forecast](docs/screenshots/page-forecast.png) |
+
+| ML diagnostics | Ancillary | Scenarios |
+| --- | --- | --- |
+| ![ML](docs/screenshots/page-ml.png) | ![Ancillary](docs/screenshots/page-ancillary.png) | ![Scenarios](docs/screenshots/page-scenarios.png) |
+
+🎬 **Video tour:** [hero-tour.webm](docs/screenshots/hero-tour.webm)
 
 ## German market context
 
@@ -48,7 +76,7 @@ dashboard/
 │   │   ├── models.py          # Pydantic response models
 │   │   └── routers/           # health, data-status, electricity, commodities, forecast,
 │   │                          # ml, ancillary, scenarios (+ _helpers)
-│   ├── tests/                 # 31 pytest cases, runnable without any live data
+│   ├── tests/                 # 32 pytest cases, runnable without any live data
 │   ├── requirements.txt
 │   └── .env.example
 ├── frontend/                  # React 19 + Vite + TS + TanStack Query
@@ -66,22 +94,14 @@ The **data plane** uses wide-format tables (`{source}__{column}`) and a director
 
 The `Makefile` prefers a local venv at `dashboard/backend/.venv` and falls back to a pixi `main` env.
 
-## Quickstart (demo mode — no data required)
-
-```bash
-cd dashboard
-make install     # creates backend/.venv, installs Python deps, npm install
-make dev         # backend on :8000, frontend on :5173
-```
-
-Or run the halves separately:
+### Run the halves separately
 
 ```bash
 make backend     # FastAPI on :8000 (separate terminal)
 make frontend    # Vite on :5173    (separate terminal)
 ```
 
-Open <http://localhost:5173>. The frontend proxies `/api` to the backend. On first start the backend generates the synthetic dataset (~5–10 s); it is cached under `dashboard/backend/demo_artifacts/` (git-ignored) and only regenerated when deleted.
+The frontend proxies `/api` to the backend. On first start the backend generates the synthetic dataset (~5–10 s); it is cached under `dashboard/backend/demo_artifacts/` (git-ignored) and only regenerated when deleted.
 
 ### Without the Makefile
 
@@ -103,7 +123,7 @@ Settings are read from environment variables or a `.env` file in `dashboard/back
 | --- | --- | --- |
 | `MARKET_DUCKDB_PATH` | *(unset = demo mode)* | Path to a read-only DuckDB file; leaving this unset runs the synthetic demo dataset. |
 | `MARKET_MODEL_RESULTS_DIR` | `demo_artifacts` | Directory for `Production_Ensemble_*` and `Forecast_*`; in demo mode the synthetic artifact set is written here (sub-dir `demo`). |
-| `MARKET_HISTORICAL_FEATURES_PATH` | `demo_artifacts/historical_features_*.parquet` | Glob for the engineered-features file used by `/api/ml/correlation-matrix`. |
+| `MARKET_HISTORICAL_FEATURES_PATH` | `demo_artifacts/demo/Historical_data_features_engineered_*.parquet` | Glob for the engineered-features file used by `/api/ml/correlation-matrix` (demo artifacts are generated in the `demo/` sub-dir). |
 | `MARKET_EUR_USD_PATH` | *(empty)* | Optional glob for the EUR/USD daily CSV sidecar; series degrades to empty when absent. |
 | `MARKET_COAL_API2_PATH` | *(empty)* | Optional glob for the Coal API2 daily CSV sidecar; same fallback. |
 | `MARKET_CORS_ORIGINS` | `["http://localhost:5173"]` | JSON array of allowed frontend origins. |
@@ -175,7 +195,7 @@ cd dashboard/backend
 make test-backend                              # uses .venv if present
 ```
 
-31 backend tests cover the data loader, all router endpoints, LTTB downsampling, health/data-status and ML/forecast/ancillary response shapes. They run in **demo mode by default** — no DuckDB or model files need to exist. In CI they run the same way (`.github/workflows/ci.yml`).
+32 backend tests cover the data loader, all router endpoints, LTTB downsampling, health/data-status and ML/forecast/ancillary response shapes. They run in **demo mode by default** — no DuckDB or model files need to exist. In CI they run the same way (`.github/workflows/ci.yml`).
 
 The frontend has no unit-test suite yet; `npm run build` (`tsc -b && vite build`) is the type-safety / API-contract gate, and `npx eslint src --max-warnings 0` runs in CI.
 

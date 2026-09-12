@@ -23,7 +23,11 @@ install: install-backend install-frontend ## Install both backend and frontend d
 
 install-backend: ## Create backend venv and install Python deps
 	python -m venv backend/.venv
+ifeq ($(OS),Windows_NT)
+	cd backend && .venv/Scripts/python -m pip install -r requirements.txt
+else
 	cd backend && .venv/bin/python -m pip install -r requirements.txt
+endif
 
 install-frontend: ## Install frontend Node deps
 	cd frontend && $(NPM) install
